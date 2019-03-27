@@ -23,91 +23,123 @@
 
 extern crate proc_macro;
 
-use std::process::Command;
 
-use syn::parse_macro_input;
-use quote::quote;
 use proc_macro_hack::proc_macro_hack;
+use syn::parse_macro_input;
 
 #[proc_macro_hack]
 pub fn run_command_str(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-	let args : Vec<_> = parse_macro_input!(input as ArgList).args.iter().map(|x| x.value()).collect();
-
-	let output = Command::new(&args[0]).args(&args[1..]).output().expect(&format!("run_command: failed to execute command: {}", &args[0]));
-	let output = verbose_command_error(&args[0], output).unwrap();
-	let output = strip_trailing_newline(output.stdout);
-	let output = std::str::from_utf8(&output).expect("invalid UTF-8 in command output");
-
-	let tokens = quote!{#output};
-	proc_macro::TokenStream::from(tokens)
+	detail::run_command_str(parse_macro_input!(input))
+		.unwrap_or_else(|error| error.to_compile_error())
+		.into()
 }
 
 #[proc_macro_hack]
 pub fn run_command(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
-	let args : Vec<_> = parse_macro_input!(input as ArgList).args.iter().map(|x| x.value()).collect();
-
-	let output = Command::new(&args[0]).args(&args[1..]).output().expect(&format!("run_command: failed to execute command: {}", &args[0]));
-	let output = verbose_command_error(&args[0], output).unwrap();
-	let output = strip_trailing_newline(output.stdout);
-	let output = std::str::from_utf8(&output).expect("invalid UTF-8 in command output");
-
-	let tokens = quote!{#output};
-	proc_macro::TokenStream::from(tokens)
+	detail::run_command(parse_macro_input!(input))
+		.unwrap_or_else(|error| error.to_compile_error())
+		.into()
 }
 
-struct ArgList {
-	args : syn::punctuated::Punctuated<syn::LitStr, syn::token::Comma>,
-}
+mod detail {
+	use std::process::Command;
 
-impl syn::parse::Parse for ArgList {
-	fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
-		type Inner = syn::punctuated::Punctuated<syn::LitStr, syn::token::Comma>;
-		let args = Inner::parse_terminated(&input)?;
+	use quote::quote;
+	use syn::{Error, Result};
+	use proc_macro2::Span;
 
-		if args.is_empty() {
-			Err(syn::Error::new(input.cursor().span(), "missing required argument: command"))
+	pub fn run_command_str(input: ArgList) -> Result<proc_macro2::TokenStream> {
+		let args : Vec<_> = input.args.iter().map(|x| x.value()).collect();
+
+		let output = execute_command(Command::new(&args[0]).args(&args[1..]))?;
+		let output = strip_trailing_newline(output.stdout);
+		let output = std::str::from_utf8(&output).expect("invalid UTF-8 in command output");
+
+		Ok(quote!(#output))
+	}
+
+	pub fn run_command(input: ArgList) -> Result<proc_macro2::TokenStream> {
+		let args : Vec<_> = input.args.iter().map(|x| x.value()).collect();
+
+		let output = execute_command(Command::new(&args[0]).args(&args[1..]))?;
+		let output = strip_trailing_newline(output.stdout);
+
+		if output.is_empty() {
+			// If the array is empty and the resulting code doesn't compile,
+			// this gives a nicer error than the else branch.
+			Ok(quote!(&[0u8; 0]))
 		} else {
-			Ok(Self{args})
+			Ok(quote!( &[ #(#output,)* ] ))
 		}
 	}
-}
 
-/// Remove a trailing newline from a byte string.
-fn strip_trailing_newline(mut input: Vec<u8>) -> Vec<u8> {
-	if input.len() > 0 && input[input.len() - 1] == b'\n' {
-		input.pop();
+	/// Comma seperated argument list of string literals.
+	pub struct ArgList {
+		args : syn::punctuated::Punctuated<syn::LitStr, syn::token::Comma>,
 	}
-	input
-}
 
-/// Check if a command ran successfully, and if not, return a verbose error.
-fn verbose_command_error<C>(command: C, output: std::process::Output) -> std::io::Result<std::process::Output> where
-	C: std::fmt::Display,
-{
-	// If the command succeeded, just return the output as is.
-	if output.status.success() {
-		Ok(output)
+	impl syn::parse::Parse for ArgList {
+		fn parse(input: syn::parse::ParseStream) -> Result<Self> {
+			type Inner = syn::punctuated::Punctuated<syn::LitStr, syn::token::Comma>;
+			let args = Inner::parse_terminated(&input)?;
 
-	// If the command terminated with non-zero exit code, return an error.
-	} else if let Some(status) = output.status.code() {
-		// Include stderr in the error message, if it's valid UTF-8 and not empty.
-		let message = strip_trailing_newline(output.stderr);
-		if let Some(message) = String::from_utf8(message).ok().filter(|x| !x.is_empty()) {
-			Err(std::io::Error::new(std::io::ErrorKind::Other, format!("{} failed with status {}: {}", command, status, message)))
+			if args.is_empty() {
+				Err(Error::new(input.cursor().span(), "missing required argument: command"))
+			} else {
+				Ok(Self{args})
+			}
+		}
+	}
+
+	fn execute_command(command: &mut Command) -> Result<std::process::Output> {
+		let output = command.output().map_err(|error|
+			Error::new(Span::call_site(), format!("failed to execute command: {}", error))
+		)?;
+
+		verbose_command_error(output).map_err(|message|
+			Error::new(Span::call_site(), message)
+		)
+	}
+
+	/// Check if a command ran successfully, and if not, return a verbose error.
+	fn verbose_command_error(output: std::process::Output) -> std::result::Result<std::process::Output, String>
+	{
+		// If the command succeeded, just return the output as is.
+		if output.status.success() {
+			Ok(output)
+
+		// If the command terminated with non-zero exit code, return an error.
+		} else if let Some(status) = output.status.code() {
+			// Include stderr in the error message, if it's valid UTF-8 and not empty.
+			let message = strip_trailing_newline(output.stderr);
+			if let Some(message) = String::from_utf8(message).ok().filter(|x| !x.is_empty()) {
+				Err(format!("external command exited with status {}: {}", status, message))
+			} else {
+				Err(format!("external command exited with status {}", status))
+			}
+
+		// The command was killed by a signal.
 		} else {
-			Err(std::io::Error::new(std::io::ErrorKind::Other, format!("{} failed with status {}", command, status)))
+			// Include the signal number on Unix.
+			#[cfg(target_family = "unix")] {
+				use std::os::unix::process::ExitStatusExt;
+				if let Some(signal) = output.status.signal() {
+					Err(format!("external command killed by signal {}", signal))
+				} else {
+					Err(format!("external command failed, but did not exit and was not killed by a signal, this can only be a bug in std::process"))
+				}
+			}
+			#[cfg(not(target_family = "unix"))] {
+				Err(format!("external command killed by signal"))
+			}
 		}
+	}
 
-	// The command was killed by a signal.
-	} else {
-		// Include the signal number on Unix.
-		#[cfg(target_family = "unix")] {
-			use std::os::unix::process::ExitStatusExt;
-			let signal = output.status.signal().unwrap();
-			Err(std::io::Error::new(std::io::ErrorKind::Other, format!("{} killed by signal {}",  command, signal)))
+	/// Remove a trailing newline from a byte string.
+	fn strip_trailing_newline(mut input: Vec<u8>) -> Vec<u8> {
+		if input.len() > 0 && input[input.len() - 1] == b'\n' {
+			input.pop();
 		}
-		#[cfg(not(target_family = "unix"))] {
-			Err(std::io::Error::new(std::io::ErrorKind::Other, format!("{} killed by signal", command)))
-		}
+		input
 	}
 }
