@@ -1,10 +1,12 @@
 [package]
-name        = "compile-time-run-macro"
-version     = "0.2.1"
-authors     = ["Maarten de Vries <maarten@de-vri.es>"]
-license     = "BSD-2-Clause"
-description = "implementation crate for compile-time-run"
-edition     = "2018"
+name          = "compile-time-run-macro"
+version       = "0.2.1"
+authors       = ["Maarten de Vries <maarten@de-vri.es>"]
+license       = "BSD-2-Clause"
+description   = "implementation crate for compile-time-run"
+documentation = "https://docs.rs/compile-time-run-macro"
+repository    = "https://github.com/de-vri-es/rust-compile-time-run"
+edition       = "2018"
 
 [lib]
 proc-macro = true
