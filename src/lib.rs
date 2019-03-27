@@ -21,10 +21,44 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+//! This crate contains macros to run commands on your system during compile time.
+//!
+//! You should probably not be doing this in most public projects,
+//! but there could be legit uses in personal or private projects.
+//!
+//! An example:
+//! ```
+//! use compile_time_run::{run_command, run_command_str};
+//! const VALUE_STR   : &'static str  = run_command_str!("echo", "Hello World!");
+//! const VALUE_BYTES : &'static [u8] = run_command!("echo", "Hello World!");
+//! ```
+
+
 use proc_macro_hack::proc_macro_hack;
 
+/// Run a command at compile time, and return the output as a byte slice.
+///
+/// The output is a static &[u8], and can be used for the value of consts.
+/// If the command fails to run, a compile error is generated.
+///
+/// For example:
+/// ```
+/// use compile_time_run::run_command;
+/// const VALUE : &'static [u8] = run_command!("echo", "Hello World!");
+/// ```
 #[proc_macro_hack]
 pub use compile_time_run_macro::run_command;
 
+
+/// Run a command at compile time, and return the output as a str.
+///
+/// The output is a static &str, and can be used for the value of consts.
+/// If the command fails to run, a compile error is generated.
+///
+/// For example:
+/// ```
+/// use compile_time_run::run_command_str;
+/// const VALUE : &'static str = run_command_str!("echo", "Hello World!");
+/// ```
 #[proc_macro_hack]
 pub use compile_time_run_macro::run_command_str;

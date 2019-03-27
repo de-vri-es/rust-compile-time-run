@@ -21,8 +21,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-extern crate proc_macro;
+//! This is an implementation crate used by [compile-time-run](https://docs.rs/compile-time-run)
+//! with [proc-macro-hack](https://docs.rs/proc-macro-hack)
+//! to expose a procedural macro that can be invoked in expression context.
 
+extern crate proc_macro;
 
 use proc_macro_hack::proc_macro_hack;
 use syn::parse_macro_input;
