@@ -110,9 +110,15 @@ mod detail {
 
 		// If the command terminated with non-zero exit code, return an error.
 		} else if let Some(status) = output.status.code() {
-			// Include stderr in the error message, if it's valid UTF-8 and not empty.
-			let message = strip_trailing_newline(output.stderr);
-			if let Some(message) = String::from_utf8(message).ok().filter(|x| !x.is_empty()) {
+			// Include stderr in the error message if it's not empty, no too long,
+			// has no newlines and is valid UTF-8.
+			let message = Some(strip_trailing_newline(output.stderr));
+
+			let message = message.filter(|m| m.len() > 0 && m.len() <= 500);
+			let message = message.filter(|m| m.iter().position(|c| c == &b'\n').is_none());
+			let message = message.and_then(|m| String::from_utf8(m).ok());
+
+			if let Some(message) = message {
 				Err(format!("external command exited with status {}: {}", status, message))
 			} else {
 				Err(format!("external command exited with status {}", status))
