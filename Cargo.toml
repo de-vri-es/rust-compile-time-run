@@ -6,6 +6,8 @@ license       = "BSD-2-Clause"
 description   = "run a command at compile time and capture the output"
 documentation = "https://docs.rs/compile-time-run"
 repository    = "https://github.com/de-vri-es/rust-compile-time-run"
+keywords      = ["build", "command", "run"]
+categories    = ["development-tools", "development-tools::build-utils"]
 edition       = "2018"
 
 [dependencies]
