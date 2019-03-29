@@ -1,6 +1,6 @@
 [package]
 name          = "compile-time-run-macro"
-version       = "0.2.4"
+version       = "0.2.5"
 authors       = ["Maarten de Vries <maarten@de-vri.es>"]
 license       = "BSD-2-Clause"
 description   = "implementation crate for compile-time-run"
