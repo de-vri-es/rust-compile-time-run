@@ -10,6 +10,9 @@ keywords      = ["build", "command", "run"]
 categories    = ["development-tools", "development-tools::build-utils"]
 edition       = "2018"
 
+[badges]
+travis-ci = { repository = "de-vri-es/rust-compile-time-run" }
+
 [dependencies]
 proc-macro-hack        = "0.5"
 compile-time-run-macro = { version="0.2", path = "compile-time-run-macro" }

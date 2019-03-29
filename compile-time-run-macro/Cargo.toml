@@ -8,6 +8,9 @@ documentation = "https://docs.rs/compile-time-run-macro"
 repository    = "https://github.com/de-vri-es/rust-compile-time-run"
 edition       = "2018"
 
+[badges]
+travis-ci = { repository = "de-vri-es/rust-compile-time-run" }
+
 [lib]
 proc-macro = true
 
