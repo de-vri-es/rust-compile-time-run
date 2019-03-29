@@ -6,6 +6,7 @@ license       = "BSD-2-Clause"
 description   = "implementation crate for compile-time-run"
 documentation = "https://docs.rs/compile-time-run-macro"
 repository    = "https://github.com/de-vri-es/rust-compile-time-run"
+readme        = "README.md"
 edition       = "2018"
 
 [badges]
