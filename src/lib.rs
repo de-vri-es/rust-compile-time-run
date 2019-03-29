@@ -22,9 +22,9 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //! This crate contains macros to run commands on your system during compile time.
+//! It can be used in some situations to take over functionaility that would otherwise
+//! have to be done using a build script.
 //!
-//! You should probably not be doing this in most public projects,
-//! but there could be legit uses in personal or private projects.
 //!
 //! An example:
 //! ```
@@ -32,6 +32,8 @@
 //! const VALUE_STR   : &'static str  = run_command_str!("echo", "Hello World!");
 //! const VALUE_BYTES : &'static [u8] = run_command!("echo", "Hello World!");
 //! ```
+//!
+//! Keep in mind that running abitrary commands during your build phase can easily hurt portability.
 
 
 use proc_macro_hack::proc_macro_hack;
