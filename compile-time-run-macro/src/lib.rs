@@ -66,14 +66,9 @@ mod detail {
 
 		let output = execute_command(Command::new(&args[0]).args(&args[1..]))?;
 		let output = strip_trailing_newline(output.stdout);
+		let output = syn::LitByteStr::new(&output, proc_macro2::Span::call_site());
 
-		if output.is_empty() {
-			// If the array is empty and the resulting code doesn't compile,
-			// this gives a nicer error than the else branch.
-			Ok(quote!(&[0u8; 0]))
-		} else {
-			Ok(quote!( &[ #(#output,)* ] ))
-		}
+		Ok(quote!(#output))
 	}
 
 	/// Comma seperated argument list of string literals.
