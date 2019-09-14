@@ -4,24 +4,10 @@ jobs:
   nightly:
     runs-on: ubuntu-latest
     steps:
+    - name: Install Rust nightly.
+      run: rustup install nightly
     - uses: actions/checkout@v1
     - name: Build
       run: cargo +nightly build --verbose
     - name: Run tests
       run: cargo +nightly test --verbose
-  beta:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v1
-    - name: Build
-      run: cargo +beta build --verbose
-    - name: Run tests
-      run: cargo +beta test --verbose
-  stable:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v1
-    - name: Build
-      run: cargo +stable build --verbose
-    - name: Run tests
-      run: cargo +stable test --verbose
