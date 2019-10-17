@@ -1,6 +1,6 @@
 [package]
 name          = "compile-time-run"
-version       = "0.2.7"
+version       = "0.2.8"
 authors       = ["Maarten de Vries <maarten@de-vri.es>"]
 license       = "BSD-2-Clause"
 description   = "run a command at compile time and capture the output"
@@ -16,7 +16,7 @@ travis-ci = { repository = "de-vri-es/rust-compile-time-run" }
 
 [dependencies]
 proc-macro-hack        = "0.5"
-compile-time-run-macro = { version="0.2.6", path = "compile-time-run-macro" }
+compile-time-run-macro = { version="=0.2.8", path = "compile-time-run-macro" }
 
 [workspace]
 members = ["compile-time-run-macro"]
