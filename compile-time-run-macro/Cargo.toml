@@ -1,6 +1,6 @@
 [package]
 name          = "compile-time-run-macro"
-version       = "0.2.6"
+version       = "0.2.7"
 authors       = ["Maarten de Vries <maarten@de-vri.es>"]
 license       = "BSD-2-Clause"
 description   = "implementation crate for compile-time-run"
@@ -16,7 +16,7 @@ travis-ci = { repository = "de-vri-es/rust-compile-time-run" }
 proc-macro = true
 
 [dependencies]
-syn             = "0.15"
-proc-macro2     = "0.4"
+syn             = "1.0"
+proc-macro2     = "1.0"
 proc-macro-hack = "0.5"
-quote           = "0.6"
+quote           = "1.0"
