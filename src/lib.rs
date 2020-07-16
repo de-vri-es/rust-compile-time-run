@@ -146,7 +146,7 @@ mod detail {
 			// has no newlines and is valid UTF-8.
 			let message = Some(strip_trailing_newline(output.stderr));
 
-			let message = message.filter(|m| m.len() > 0 && m.len() <= 500);
+			let message = message.filter(|m| !m.is_empty() && m.len() <= 500);
 			let message = message.filter(|m| m.iter().position(|c| c == &b'\n').is_none());
 			let message = message.and_then(|m| String::from_utf8(m).ok());
 
@@ -164,7 +164,7 @@ mod detail {
 				if let Some(signal) = output.status.signal() {
 					Err(format!("external command killed by signal {}", signal))
 				} else {
-					Err(format!("external command failed, but did not exit and was not killed by a signal, this can only be a bug in std::process"))
+					Err("external command failed, but did not exit and was not killed by a signal, this can only be a bug in std::process".into())
 				}
 			}
 			#[cfg(not(target_family = "unix"))] {
@@ -175,7 +175,7 @@ mod detail {
 
 	/// Remove a trailing newline from a byte string.
 	fn strip_trailing_newline(mut input: Vec<u8>) -> Vec<u8> {
-		if input.len() > 0 && input[input.len() - 1] == b'\n' {
+		if !input.is_empty() && input[input.len() - 1] == b'\n' {
 			input.pop();
 		}
 		input
