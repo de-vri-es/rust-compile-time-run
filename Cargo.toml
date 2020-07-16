@@ -1,22 +1,28 @@
 [package]
-name          = "compile-time-run"
-version       = "0.2.8"
-authors       = ["Maarten de Vries <maarten@de-vri.es>"]
-license       = "BSD-2-Clause"
-description   = "run a command at compile time and capture the output"
+name = "compile-time-run"
+version = "0.2.8"
+description = "run a command at compile time and capture the output"
+license = "BSD-2-Clause"
+authors = ["Maarten de Vries <maarten@de-vri.es>"]
+
 documentation = "https://docs.rs/compile-time-run"
-repository    = "https://github.com/de-vri-es/rust-compile-time-run"
-readme        = "README.md"
-keywords      = ["build", "command", "run"]
-categories    = ["development-tools", "development-tools::build-utils"]
-edition       = "2018"
+repository = "https://github.com/de-vri-es/rust-compile-time-run"
+readme = "README.md"
+keywords = ["build", "command", "run"]
+categories = ["development-tools", "development-tools::build-utils"]
+
+edition = "2018"
 
 [badges]
 travis-ci = { repository = "de-vri-es/rust-compile-time-run" }
 
-[dependencies]
-proc-macro-hack        = "0.5"
-compile-time-run-macro = { version="=0.2.8", path = "compile-time-run-macro" }
+[lib]
+proc-macro = true
 
-[workspace]
-members = ["compile-time-run-macro"]
+[dev-dependencies]
+assert2 = "0.3.0"
+
+[dependencies]
+syn = "1.0"
+proc-macro2 = "1.0"
+quote = "1.0"
