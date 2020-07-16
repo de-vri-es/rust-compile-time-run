@@ -4,7 +4,7 @@
 
 # compile-time-run
 
-This crate contains macros to run commands on the build system at compile time.
+This crate contains macros to run commands on the host system at compile time.
 It can be used in some situations to take over functionaility that would otherwise
 have to be done using a build script.
 

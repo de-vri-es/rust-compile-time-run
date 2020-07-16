@@ -21,7 +21,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-//! This crate contains macros to run commands on the build system at compile time.
+//! This crate contains macros to run commands on the host system at compile time.
 //! It can be used in some situations to take over functionaility that would otherwise
 //! have to be done using a build script.
 //!
