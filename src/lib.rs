@@ -21,7 +21,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-//! This crate contains macros to run commands on your system during compile time.
+//! This crate contains macros to run commands on the build system at compile time.
 //! It can be used in some situations to take over functionaility that would otherwise
 //! have to be done using a build script.
 //!
@@ -33,7 +33,7 @@
 //! const VALUE_BYTES : &'static [u8] = run_command!("echo", "Hello World!");
 //! ```
 //!
-//! Keep in mind that running abitrary commands during your build phase can easily hurt portability.
+//! Keep in mind that running arbitrary commands during your build phase can easily hurt portability.
 
 use syn::parse_macro_input;
 
@@ -41,6 +41,9 @@ use syn::parse_macro_input;
 ///
 /// The output is a static &[u8], and can be used for the value of consts.
 /// If the command fails to run, a compile error is generated.
+///
+/// If the output ends with a newline, it is stripped.
+/// At most one newline character is stripped this way.
 ///
 /// For example:
 /// ```
@@ -59,6 +62,9 @@ pub fn run_command(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 ///
 /// The output is a static &str, and can be used for the value of consts.
 /// If the command fails to run, a compile error is generated.
+///
+/// If the output ends with a newline, it is stripped.
+/// At most one newline character is stripped this way.
 ///
 /// For example:
 /// ```

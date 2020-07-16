@@ -4,7 +4,7 @@
 
 # compile-time-run
 
-This crate contains macros to run commands on your system during compile time.
+This crate contains macros to run commands on the build system at compile time.
 It can be used in some situations to take over functionaility that would otherwise
 have to be done using a build script.
 
@@ -16,4 +16,4 @@ const VALUE_STR   : &'static str  = run_command_str!("echo", "Hello World!");
 const VALUE_BYTES : &'static [u8] = run_command!("echo", "Hello World!");
 ```
 
-Keep in mind that running abitrary commands during your build phase can easily hurt portability.
+Keep in mind that running arbitrary commands during your build phase can easily hurt portability.
