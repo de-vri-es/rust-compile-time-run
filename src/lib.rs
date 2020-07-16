@@ -57,7 +57,6 @@ pub fn run_command(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 		.into()
 }
 
-
 /// Run a command at compile time, and return the output as a str.
 ///
 /// The output is a static &str, and can be used for the value of consts.
@@ -81,12 +80,12 @@ pub fn run_command_str(input: proc_macro::TokenStream) -> proc_macro::TokenStrea
 mod detail {
 	use std::process::Command;
 
+	use proc_macro2::Span;
 	use quote::quote;
 	use syn::{Error, Result};
-	use proc_macro2::Span;
 
 	pub fn run_command_str(input: ArgList) -> Result<proc_macro2::TokenStream> {
-		let args : Vec<_> = input.args.iter().map(|x| x.value()).collect();
+		let args: Vec<_> = input.args.iter().map(|x| x.value()).collect();
 
 		let output = execute_command(Command::new(&args[0]).args(&args[1..]))?;
 		let output = strip_trailing_newline(output.stdout);
@@ -96,7 +95,7 @@ mod detail {
 	}
 
 	pub fn run_command(input: ArgList) -> Result<proc_macro2::TokenStream> {
-		let args : Vec<_> = input.args.iter().map(|x| x.value()).collect();
+		let args: Vec<_> = input.args.iter().map(|x| x.value()).collect();
 
 		let output = execute_command(Command::new(&args[0]).args(&args[1..]))?;
 		let output = strip_trailing_newline(output.stdout);
@@ -107,7 +106,7 @@ mod detail {
 
 	/// Comma seperated argument list of string literals.
 	pub struct ArgList {
-		args : syn::punctuated::Punctuated<syn::LitStr, syn::token::Comma>,
+		args: syn::punctuated::Punctuated<syn::LitStr, syn::token::Comma>,
 	}
 
 	impl syn::parse::Parse for ArgList {
@@ -118,24 +117,21 @@ mod detail {
 			if args.is_empty() {
 				Err(Error::new(input.cursor().span(), "missing required argument: command"))
 			} else {
-				Ok(Self{args})
+				Ok(Self { args })
 			}
 		}
 	}
 
 	fn execute_command(command: &mut Command) -> Result<std::process::Output> {
-		let output = command.output().map_err(|error|
-			Error::new(Span::call_site(), format!("failed to execute command: {}", error))
-		)?;
+		let output = command
+			.output()
+			.map_err(|error| Error::new(Span::call_site(), format!("failed to execute command: {}", error)))?;
 
-		verbose_command_error(output).map_err(|message|
-			Error::new(Span::call_site(), message)
-		)
+		verbose_command_error(output).map_err(|message| Error::new(Span::call_site(), message))
 	}
 
 	/// Check if a command ran successfully, and if not, return a verbose error.
-	fn verbose_command_error(output: std::process::Output) -> std::result::Result<std::process::Output, String>
-	{
+	fn verbose_command_error(output: std::process::Output) -> std::result::Result<std::process::Output, String> {
 		// If the command succeeded, just return the output as is.
 		if output.status.success() {
 			Ok(output)
@@ -159,7 +155,8 @@ mod detail {
 		// The command was killed by a signal.
 		} else {
 			// Include the signal number on Unix.
-			#[cfg(target_family = "unix")] {
+			#[cfg(target_family = "unix")]
+			{
 				use std::os::unix::process::ExitStatusExt;
 				if let Some(signal) = output.status.signal() {
 					Err(format!("external command killed by signal {}", signal))
@@ -167,7 +164,8 @@ mod detail {
 					Err("external command failed, but did not exit and was not killed by a signal, this can only be a bug in std::process".into())
 				}
 			}
-			#[cfg(not(target_family = "unix"))] {
+			#[cfg(not(target_family = "unix"))]
+			{
 				Err(format!("external command killed by signal"))
 			}
 		}
