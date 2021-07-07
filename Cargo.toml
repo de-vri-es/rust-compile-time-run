@@ -1,6 +1,6 @@
 [package]
 name = "compile-time-run"
-version = "0.2.11"
+version = "0.2.12"
 description = "run a command at compile time and capture the output"
 license = "BSD-2-Clause"
 authors = ["Maarten de Vries <maarten@de-vri.es>"]
