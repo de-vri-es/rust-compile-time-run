@@ -112,7 +112,7 @@ mod detail {
 	impl syn::parse::Parse for ArgList {
 		fn parse(input: syn::parse::ParseStream) -> Result<Self> {
 			type Inner = syn::punctuated::Punctuated<syn::LitStr, syn::token::Comma>;
-			let args = Inner::parse_terminated(&input)?;
+			let args = Inner::parse_terminated(input)?;
 
 			if args.is_empty() {
 				Err(Error::new(input.cursor().span(), "missing required argument: command"))
@@ -143,7 +143,7 @@ mod detail {
 			let message = Some(strip_trailing_newline(output.stderr));
 
 			let message = message.filter(|m| !m.is_empty() && m.len() <= 500);
-			let message = message.filter(|m| m.iter().position(|c| c == &b'\n').is_none());
+			let message = message.filter(|m| !m.iter().any(|c| c == &b'\n'));
 			let message = message.and_then(|m| String::from_utf8(m).ok());
 
 			if let Some(message) = message {
